@@ -6,10 +6,18 @@ import{
     AGREGAR_PRODUCTO_ERROR,
     COMENZAR_DESCARGA_PRODUCTOS,
     DESCARGA_PRODUCTOS_EXITO,
-    DESCARGA_PRODUCTOS_ERROR
+    DESCARGA_PRODUCTOS_ERROR,
+    OBTENER_PRODUCTO_ELIMINAR,
+    PRODUCTO_ELIMINADO_EXITO,
+    PRODUCTO_ELIMINADO_ERROR,
+    OBTENER_PRODUCTO_EDITAR,
+    COMENZAR_EDICION_PRODUCTO,
+    PRODUCTO_EDITADO_EXITO,
+    PRODUCTO_EDITADO_ERROR
 } from '../types';
 import clienteAxios from '../config/axios'
 import Swal from 'sweetalert2';
+// import EditarProducto from '../components/EditarProducto';
 
 
 //Crear nuevos Productos 
@@ -36,11 +44,13 @@ export function crearNuevoProductoAction(producto){//esta funcion se usa en comp
             //alerta de error
             Swal.fire({
                 icon: 'error',
-                title: 'Hubo un error , intente de nuevo '
+                title: 'Hubo un error , intente de nuevo ',
+                text: 'hubo un error'
             })
         }
     }
 }
+
 const agregarProducto = () =>({
     type: AGREGAR_PRODUCTO,
     payload: true,
@@ -51,7 +61,7 @@ const agregarProductoExito = producto => ({
 })
 const agregarProductoError = estado => ({
     type: AGREGAR_PRODUCTO_ERROR,
-    payload: estado,
+    payload: estado
 
 });
 //funcion que descarga los prodyuctos de la base de datos
@@ -59,9 +69,102 @@ const agregarProductoError = estado => ({
 export function obtenerProductoAction(){
     return async (dispatch) =>{
         dispatch( descargarProductos());
+        try {
+            setTimeout(async ()=>{
+                const respuesta = await clienteAxios.get('/productos');
+                dispatch(descargaProductoExitosa(respuesta.data));
+            },3000);
+            const respuesta = await clienteAxios.get('/productos');
+                dispatch(descargaProductoExitosa(respuesta.data));
+           
+        } catch (error) {
+            console.log(error);
+            dispatch(descargaProductoError())
+        }
     }
 }
 const descargarProductos = () =>({
     type: COMENZAR_DESCARGA_PRODUCTOS,
     payload: true
+})
+
+const descargaProductoExitosa = productos =>({
+    type: DESCARGA_PRODUCTOS_EXITO,
+    payload: productos
+})
+
+const descargaProductoError = () =>({
+    type: DESCARGA_PRODUCTOS_ERROR,
+    payload:true
+})
+
+//SELECIONA Y ELIMINA PRODUCTO
+export function borrarProductoAction(id){
+    return async (dispatch) =>{
+        dispatch(obtenerProductoEliminar(id));
+        try {
+            await clienteAxios.delete(`/productos/${id}`);
+            dispatch(eliminarProductoExito())
+
+            //si se elimina 
+            Swal.fire(
+                'Eliminado!',
+                'Producto se elimino correctamente.',
+                'success'
+              )
+        } catch (error) {
+            console.log.log(error);
+            dispatch(eliminarProductoError());
+            
+        }
+
+    }
+}
+ const obtenerProductoEliminar = id => ({
+    type: OBTENER_PRODUCTO_ELIMINAR,
+    payload: id
+});
+const eliminarProductoExito = () => ({
+    type: PRODUCTO_ELIMINADO_EXITO
+});
+const eliminarProductoError = () => ({
+    type: PRODUCTO_ELIMINADO_ERROR,
+    payload:true
+});
+
+//COLOCAR PRODUCTO EN EDICION
+export function obtenerProductoEditar(producto){
+    return(dispatch)=>{
+        dispatch(obtenerProductoEditarAction(producto))
+    }
+}
+const obtenerProductoEditarAction = producto =>({
+    type: OBTENER_PRODUCTO_EDITAR,
+    payload: producto
+});
+
+//EDITAR UN REJISTRO EN LA API y state
+export function editarProductoAction(producto){
+    return async (dispatch) =>{
+        dispatch( editarProducto(producto) )
+        try {
+            await clienteAxios.put(`/productos/${producto.id}`,producto);
+            dispatch(editarProductoExito(producto));
+        } catch (error) {
+            dispatch( editarProductoError());
+        }
+    
+    
+    }
+}
+const editarProducto = () =>({
+    type: COMENZAR_EDICION_PRODUCTO
+});
+const editarProductoExito = producto =>({
+    type: PRODUCTO_EDITADO_EXITO,
+    payload: producto
+});
+const editarProductoError = () =>({
+    type: PRODUCTO_EDITADO_ERROR,
+    payload:true
 })

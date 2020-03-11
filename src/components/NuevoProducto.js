@@ -2,12 +2,12 @@ import React, {useState} from 'react';
 import { useDispatch, useSelector} from 'react-redux'
 //action de redux
 import { crearNuevoProductoAction } from '../actions/productoActions'; 
-
+import {mostrarAlerta, ocultarAlertAccion} from '../actions/alertaActions'
 
 const NuevoProducto = ({history}) => {
     //state componente
     const [nombre, guardarNombre] = useState('');
-    const [precio, guardarPrecio] = useState();
+    const [precio, guardarPrecio] = useState(0);
 /*AGREGAR---------------------------------------------------------*/
             //utilizar use distpach y te crea una funcion
     const distpach = useDispatch();
@@ -16,6 +16,7 @@ const NuevoProducto = ({history}) => {
             //Acceder al state del store 
     const cargando = useSelector((state) => state.productos.loading);
     const error = useSelector((state) => state.productos.error);
+    const alerta = useSelector(state => state.alerta.alerta);
     
 
             //mandar llamar el action de productoAction
@@ -24,16 +25,22 @@ const NuevoProducto = ({history}) => {
 /*-------------------------------------------------------AGREGAR*/
 
 //cuando el usuario haga submit
-const submitNuevoProducto = (e)=>{
+const submitNuevoProducto = e =>{
       e.preventDefault();
     
         //1_Validar formulario
-    // if(nombre.trim()==='' || precio <= 0){
-    //     return;
-    // }
+    if(nombre.trim() === '' || precio <= 0){
+
+        const alerta = {
+            msg:'Ambos campos son obligatorios',
+            classes: 'alert alert-danger text-center text-uppercase p3'
+        }
+        distpach( mostrarAlerta(alerta) );
+        return;
+    }
     
         //2_si no hay errores
-    
+        distpach(ocultarAlertAccion());
     
         //3_crear el nuevo producto
         agregarProducto({
@@ -56,6 +63,7 @@ const submitNuevoProducto = (e)=>{
                       <h2 className="text-center mb-4 font-weight-bold">
                           Agregar Nuevo Producto 
                       </h2>
+                        {alerta ? <p className={alerta.classes}>{alerta.msg}</p>: null}
                       <form
                       onSubmit={submitNuevoProducto}
                       >

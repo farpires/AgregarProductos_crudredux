@@ -9,7 +9,7 @@ const Header = () => {
 
                 <h1>
                     <Link to={'/'} className="text-light" >
-                    CRUD - React, Redux, REST API Axios
+                    CRUD - Rincón de Buscajá
                     </Link>
                 </h1>
 
